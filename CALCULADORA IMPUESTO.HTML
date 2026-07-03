@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💰 Sistema de Cálculo de Impuestos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 28px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .subtitle {
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #2d3748;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        label .required {
+            color: #e53e3e;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+            background: #f7fafc;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group .currency {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #718096;
+            font-weight: 600;
+        }
+
+        .input-group input {
+            padding-left: 30px;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #48bb78;
+            margin-top: 0;
+        }
+
+        .btn-secondary:hover {
+            background: #38a169;
+            box-shadow: 0 10px 20px rgba(72, 187, 120, 0.3);
+        }
+
+        .resultados {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 15px;
+            display: none;
+        }
+
+        .resultados.visible {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .resultado-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .resultado-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .resultado-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .resultado-header h3 {
+            color: #2d3748;
+            font-size: 18px;
+        }
+
+        .badge {
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge.bono {
+            background: #48bb78;
+        }
+
+        .detalle-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .detalle-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #edf2f7;
+        }
+
+        .detalle-item .label {
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .detalle-item .value {
+            color: #2d3748;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .detalle-item .value.total {
+            color: #667eea;
+            font-size: 18px;
+        }
+
+        .total-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .total-card .label {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .total-card .value {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .error {
+            background: #fff5f5;
+            border: 1px solid #fc8181;
+            color: #c53030;
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .error.visible {
+            display: block;
+        }
+
+        .comparativa-btn {
+            background: #edf2f7;
+            color: #2d3748;
+            padding: 10px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .comparativa-btn:hover {
+            background: #e2e8f0;
+        }
+
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #a0aec0;
+            font-size: 12px;
+        }
+
+        @media (max-width: 640px) {
+            .row {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            .detalle-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .total-card .value {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>💰 Sistema de Cálculo de Impuestos</h1>
+    <p class="subtitle">Calcula tu salario neto después de deducciones y bonos por región</p>
+
+    <form id="calculadoraForm">
+        <div class="row">
+            <div class="form-group">
+                <label>Salario Bruto <span class="required">*</span></label>
+                <div class="input-group">
+                    <span class="currency">$</span>
+                    <input type="number" id="salario" placeholder="Ej: 1000" step="0.01" min="0.01" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Base de Deducción <span class="required">*</span></label>
+                <div class="input-group">
+                    <span class="currency">$</span>
+                    <input type="number" id="deduccion" placeholder="Ej: 150" step="0.01" min="0" required>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Región <span class="required">*</span></label>
+            <select id="region" required>
+                <option value="">Selecciona una región...</option>
+                <option value="SV">🇸🇻 El Salvador (15% + Bono $13)</option>
+                <option value="US">🇺🇸 Estados Unidos (20%)</option>
+                <option value="MX">🇲🇽 México (16%)</option>
+                <option value="GT">🇬🇹 Guatemala (12%)</option>
+                <option value="HN">🇭🇳 Honduras (10%)</option>
+                <option value="NI">🇳🇮 Nicaragua (11%)</option>
+                <option value="CR">🇨🇷 Costa Rica (13%)</option>
+                <option value="PA">🇵🇦 Panamá (14%)</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn">📊 Calcular Impuestos</button>
+    </form>
+
+    <div id="error" class="error"></div>
+
+    <div id="resultados" class="resultados">
+        <h3 style="margin-bottom: 15px; color: #2d3748;">📋 Resultado del Cálculo</h3>
+        <div id="resultadoUnico"></div>
+
+        <button id="btnComparativa" class="comparativa-btn">🔍 Ver comparativa con todas las regiones</button>
+        <div id="comparativaResultados" style="margin-top: 15px;"></div>
+    </div>
+
+    <div class="footer">
+        Sistema de Cálculo de Impuestos v2.0 | Documentación técnica incluida
+    </div>
+</div>
+
+<script>
+    // ============================================
+    // CONFIGURACIÓN DE REGIONES
+    // ============================================
+    const CONFIG_REGIONES = {
+        sv: {
+            nombre: "El Salvador",
+            porcentajeDescuento: 0.15,
+            bono: 13,
+            moneda: "$",
+            bandera: "🇸🇻"
+        },
+        us: {
+            nombre: "Estados Unidos",
+            porcentajeDescuento: 0.20,
+            bono: 0,
+            moneda: "$",
+            bandera: "🇺🇸"
+        },
+        mx: {
+            nombre: "México",
+            porcentajeDescuento: 0.16,
+            bono: 0,
+            moneda: "$",
+            bandera: "🇲🇽"
+        },
+        gt: {
+            nombre: "Guatemala",
+            porcentajeDescuento: 0.12,
+            bono: 0,
+            moneda: "Q",
+            bandera: "🇬🇹"
+        },
+        hn: {
+            nombre: "Honduras",
+            porcentajeDescuento: 0.10,
+            bono: 0,
+            moneda: "L",
+            bandera: "🇭🇳"
+        },
+        ni: {
+            nombre: "Nicaragua",
+            porcentajeDescuento: 0.11,
+            bono: 0,
+            moneda: "C$",
+            bandera: "🇳🇮"
+        },
+        cr: {
+            nombre: "Costa Rica",
+            porcentajeDescuento: 0.13,
+            bono: 0,
+            moneda: "₡",
+            bandera: "🇨🇷"
+        },
+        pa: {
+            nombre: "Panamá",
+            porcentajeDescuento: 0.14,
+            bono: 0,
+            moneda: "B/",
+            bandera: "🇵🇦"
+        }
+    };
+
+    // ============================================
+    // FUNCIÓN PRINCIPAL DE CÁLCULO
+    // ============================================
+    function calcularImpuestos(salario, deduccionBase, region) {
+        // Validaciones
+        if (salario <= 0) throw new Error("El salario debe ser mayor a 0");
+        if (deduccionBase < 0) throw new Error("La base de deducción no puede ser negativa");
+        if (!region) throw new Error("Debes seleccionar una región");
+
+        const config = CONFIG_REGIONES[region.toLowerCase()];
+        if (!config) throw new Error(`Región "${region}" no soportada`);
+
+        // Cálculos
+        const descuento = deduccionBase * config.porcentajeDescuento;
+        let neto = salario - descuento;
+        let bonoAplicado = 0;
+
+        if (config.bono > 0) {
+            neto += config.bono;
+            bonoAplicado = config.bono;
+        }
+
+        neto = Math.round(neto * 100) / 100;
+        const descuentoRedondeado = Math.round(descuento * 100) / 100;
+
+        return {
+            region: region.toUpperCase(),
+            nombreRegion: config.nombre,
+            bandera: config.bandera,
+            moneda: config.moneda,
+            salarioBruto: salario,
+            deduccionBase: deduccionBase,
+            porcentajeDescuento: config.porcentajeDescuento * 100,
+            descuentoAplicado: descuentoRedondeado,
+            bonoAplicado: bonoAplicado,
+            salarioNeto: neto,
+            totalDeducciones: descuentoRedondeado,
+            formula: `${salario} - ${descuentoRedondeado} ${bonoAplicado > 0 ? `+ ${bonoAplicado}` : ''} = ${neto}`
+        };
+    }
+
+    // ============================================
+    // FUNCIONES DE RENDERIZADO
+    // ============================================
+    function renderResultado(resultado) {
+        const hasBono = resultado.bonoAplicado > 0;
+        
+        return `
+            <div class="resultado-card">
+                <div class="resultado-header">
+                    <h3>${resultado.bandera} ${resultado.nombreRegion} (${resultado.region})</h3>
+                    <span class="badge ${hasBono ? 'bono' : ''}">
+                        ${hasBono ? '🎯 Bono aplicado' : 'Sin bono'}
+                    </span>
+                </div>
+                
+                <div class="detalle-grid">
+                    <div class="detalle-item">
+                        <span class="label">Salario Bruto</span>
+                        <span class="value">${resultado.moneda} ${resultado.salarioBruto}</span>
+                    </div>
+                    <div class="detalle-item">
+                        <span class="label">Base de Deducción</span>
+                        <span class="value">${resultado.moneda} ${resultado.deduccionBase}</span>
+                    </div>
+                    <div class="detalle-item">
+                        <span class="label">Porcentaje de Descuento</span>
+                        <span class="value">${resultado.porcentajeDescuento}%</span>
+                    </div>
+                    <div class="detalle-item">
+                        <span class="label">Descuento Aplicado</span>
+                        <span class="value">-${resultado.moneda} ${resultado.descuentoAplicado}</span>
+                    </div>
+                    ${resultado.bonoAplicado > 0 ? `
+                        <div class="detalle-item">
+                            <span class="label">Bono Regional</span>
+                            <span class="value" style="color: #48bb78;">+${resultado.moneda} ${resultado.bonoAplicado}</span>
+                        </div>
+                    ` : ''}
+                    <div class="detalle-item" style="border-bottom: none; padding-top: 10px; margin-top: 5px; border-top: 2px solid #e2e8f0;">
+                        <span class="label" style="font-weight: 700;">Salario Neto</span>
+                        <span class="value total">${resultado.moneda} ${resultado.salarioNeto}</span>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 15px; padding: 10px; background: #f7fafc; border-radius: 8px; font-size: 13px; color: #718096;">
+                    <strong>Fórmula:</strong> ${resultado.formula}
+                </div>
+            </div>
+        `;
+    }
+
+    function renderComparativa(resultados) {
+        let html = '<h4 style="margin-bottom: 10px; color: #2d3748;">📊 Comparativa por Región</h4>';
+        
+        // Ordenar por salario neto (mayor a menor)
+        const sorted = Object.values(resultados).sort((a, b) => b.salarioNeto - a.salarioNeto);
+        
+        html += '<div style="display: grid; gap: 10px;">';
+        sorted.forEach((r, index) => {
+            const rank = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`;
+            html += `
+                <div style="display: flex; justify-content: space-between; align-items: center; 
+                     padding: 12px 15px; background: white; border-radius: 8px; 
+                     border-left: 3px solid ${index === 0 ? '#48bb78' : '#e2e8f0'};">
+                    <div>
+                        <span style="font-weight: 600;">${r.bandera} ${r.nombreRegion}</span>
+                        <span style="font-size: 12px; color: #718096; margin-left: 10px;">${r.porcentajeDescuento}%</span>
+                        ${r.bonoAplicado > 0 ? '<span style="font-size: 11px; color: #48bb78; margin-left: 5px;">+Bono</span>' : ''}
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-weight: 700; color: ${index === 0 ? '#48bb78' : '#2d3748'};">
+                            ${r.moneda} ${r.salarioNeto}
+                        </span>
+                        <span style="font-size: 16px;">${rank}</span>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+        
+        return html;
+    }
+
+    // ============================================
+    // MANEJADORES DE EVENTOS
+    // ============================================
+    document.getElementById('calculadoraForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const salario = parseFloat(document.getElementById('salario').value);
+        const deduccion = parseFloat(document.getElementById('deduccion').value);
+        const region = document.getElementById('region').value;
+        
+        const errorDiv = document.getElementById('error');
+        const resultadosDiv = document.getElementById('resultados');
+        
+        try {
+            errorDiv.className = 'error';
+            errorDiv.textContent = '';
+            
+            const resultado = calcularImpuestos(salario, deduccion, region);
+            
+            document.getElementById('resultadoUnico').innerHTML = renderResultado(resultado);
+            document.getElementById('comparativaResultados').innerHTML = '';
+            
+            resultadosDiv.className = 'resultados visible';
+            
+        } catch (error) {
+            errorDiv.textContent = '❌ ' + error.message;
+            errorDiv.className = 'error visible';
+            resultadosDiv.className = 'resultados';
+        }
+    });
+
+    document.getElementById('btnComparativa').addEventListener('click', function() {
+        const salario = parseFloat(document.getElementById('salario').value);
+        const deduccion = parseFloat(document.getElementById('deduccion').value);
+        
+        const errorDiv = document.getElementById('error');
+        
+        if (!salario || salario <= 0) {
+            errorDiv.textContent = '❌ Por favor, ingresa un salario válido primero';
+            errorDiv.className = 'error visible';
+            return;
+        }
+        
+        errorDiv.className = 'error';
+        errorDiv.textContent = '';
+        
+        const resultados = {};
+        const regiones = ['SV', 'US', 'MX', 'GT', 'HN', 'NI', 'CR', 'PA'];
+        
+        regiones.forEach(region => {
+            try {
+                resultados[region] = calcularImpuestos(salario, deduccion, region);
+            } catch (e) {
+                // Ignorar errores
+            }
+        });
+        
+        document.getElementById('comparativaResultados').innerHTML = renderComparativa(resultados);
+    });
+
+    // ============================================
+    // EJEMPLO POR DEFECTO
+    // ============================================
+    window.addEventListener('load', function() {
+        document.getElementById('salario').value = '1000';
+        document.getElementById('deduccion').value = '150';
+        document.getElementById('region').value = 'SV';
+        
+        // Auto-calcular al cargar
+        const event = new Event('submit');
+        document.getElementById('calculadoraForm').dispatchEvent(event);
+    });
+</script>
+
+</body>
+</html>
